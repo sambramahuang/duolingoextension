@@ -3,203 +3,384 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LingoLens Media Studio</title>
+    <title>Duolingo Creators — Upload Studio</title>
     <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <div class="page-shell">
-      <header class="topbar">
-        <a href="#" class="brand">
-          <span class="brand-mark">LL</span>
-          <span class="brand-copy">
-            <strong>LingoLens</strong>
-            <small>Media Studio for Duolingo</small>
-          </span>
-        </a>
-        <nav class="nav-links">
-          <a href="#workspace">Score Media</a>
-          <a href="#library">Demo Library</a>
-          <a href="#transformation">Why It Works</a>
+    <div class="app-shell">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="duo-icon">D</div>
+          <div>
+            <strong>Duolingo</strong>
+            <small>Creator Studio</small>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="#" class="nav-item active" data-page="upload">
+            <span class="nav-icon">+</span> Upload Video
+          </a>
+          <a href="#" class="nav-item" data-page="my-videos">
+            <span class="nav-icon">▶</span> My Videos
+          </a>
+          <a href="#" class="nav-item" data-page="analytics">
+            <span class="nav-icon">◉</span> Analytics
+          </a>
+          <a href="#" class="nav-item" data-page="guidelines">
+            <span class="nav-icon">✓</span> Content Guidelines
+          </a>
         </nav>
-        <div class="nav-pill">Front-end Prototype</div>
-      </header>
 
-      <section class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">Digital Transformation Concept</p>
-          <h1>Bring TikTok, Reels, and YouTube into the Duolingo learning loop.</h1>
-          <p class="hero-text">
-            Learners paste a link or upload a clip, and the page scores how useful
-            that video is for learning a specific language at a specific level.
-          </p>
-          <div class="hero-actions">
-            <a href="#workspace" class="primary-link">Try the scoring flow</a>
-            <a href="#library" class="secondary-link">See demo imports</a>
+        <div class="sidebar-profile">
+          <div class="avatar">MR</div>
+          <div>
+            <strong>Maria Rodriguez</strong>
+            <small>Spanish Creator · Verified</small>
           </div>
         </div>
+      </aside>
 
-        <div class="hero-panel">
-          <div class="hero-stat">
-            <span>Usefulness Score</span>
-            <strong>0-100</strong>
-            <p>Prototype estimate based on clarity, subtitle quality, pace, and level fit.</p>
-          </div>
-          <div class="hero-stat">
-            <span>Best for</span>
-            <strong>A1-C1</strong>
-            <p>Routes each video toward the right learner instead of treating every clip the same.</p>
-          </div>
-          <div class="hero-stat accent">
-            <span>Outcome</span>
-            <strong>Real-world media</strong>
-            <p>Duolingo shifts from fixed lessons into personalized, internet-native learning.</p>
-          </div>
-        </div>
-      </section>
+      <!-- Main Content -->
+      <main class="main-content">
 
-      <main id="workspace" class="workspace-grid">
-        <section class="glass-panel intake-panel">
-          <div class="section-heading">
+        <!-- UPLOAD PAGE -->
+        <section id="page-upload" class="page active">
+          <div class="page-header">
             <div>
-              <p class="section-label">Media Intake</p>
-              <h2>Analyze a video source</h2>
+              <h1>Upload a Learning Video</h1>
+              <p>Your video will be scored for learning value and matched to the right learners.</p>
             </div>
-            <span class="status-badge" id="sync-status">Ready</span>
+            <div class="creator-stats-mini">
+              <div class="stat-chip"><strong>12.4K</strong> followers</div>
+              <div class="stat-chip"><strong>89</strong> avg. score</div>
+              <div class="stat-chip accent"><strong>Top 5%</strong> creator</div>
+            </div>
           </div>
 
-          <form id="analysis-form" class="analysis-form">
-            <label class="field">
-              <span>Video URL</span>
-              <input
-                type="url"
-                id="video-url"
-                placeholder="https://www.tiktok.com/@creator/video/123..."
-              />
-            </label>
+          <div class="upload-layout">
+            <!-- Left: Upload + Details -->
+            <div class="upload-form-area">
+              <div class="drop-zone" id="drop-zone">
+                <div class="drop-zone-inner">
+                  <div class="drop-icon">
+                    <div class="upload-arrow">↑</div>
+                  </div>
+                  <h3>Drag & drop your video</h3>
+                  <p>or click to browse files</p>
+                  <p class="file-hint">MP4, MOV, or WebM · Under 3 minutes · Max 500 MB</p>
+                  <input type="file" id="video-file" accept="video/*" hidden />
+                </div>
+              </div>
 
-            <label class="upload-field" for="video-file">
-              <span>Upload a local clip</span>
-              <input type="file" id="video-file" accept="video/*" />
-              <strong id="file-name">No file selected</strong>
-              <small>Useful for demos before the real ingestion backend exists.</small>
-            </label>
+              <!-- File selected state -->
+              <div class="file-selected hidden" id="file-selected">
+                <div class="file-preview">
+                  <video id="video-preview" muted></video>
+                  <div class="file-overlay">
+                    <button class="btn-change-file" id="btn-change-file">Change file</button>
+                  </div>
+                </div>
+                <div class="file-info">
+                  <strong id="selected-file-name">video.mp4</strong>
+                  <span id="selected-file-size">0 MB</span>
+                </div>
+              </div>
 
-            <div class="form-grid">
-              <label class="field">
-                <span>Target language</span>
-                <select id="target-language"></select>
-              </label>
+              <form id="video-details-form" class="video-details">
+                <label class="field">
+                  <span>Video Title</span>
+                  <input type="text" id="video-title" placeholder="e.g. Ordering food at a Mexican restaurant" />
+                </label>
 
-              <label class="field">
-                <span>Learner level</span>
-                <select id="learner-level"></select>
-              </label>
+                <label class="field">
+                  <span>Description</span>
+                  <textarea id="video-desc" rows="3" placeholder="What will learners pick up from this video?"></textarea>
+                </label>
+
+                <div class="form-row">
+                  <label class="field">
+                    <span>Language</span>
+                    <select id="video-language">
+                      <option value="es">Spanish</option>
+                      <option value="fr">French</option>
+                      <option value="de">German</option>
+                      <option value="ja">Japanese</option>
+                      <option value="ko">Korean</option>
+                      <option value="zh">Mandarin Chinese</option>
+                      <option value="pt">Portuguese</option>
+                      <option value="it">Italian</option>
+                      <option value="ar">Arabic</option>
+                      <option value="hi">Hindi</option>
+                    </select>
+                  </label>
+
+                  <label class="field">
+                    <span>Best for Level</span>
+                    <select id="video-level">
+                      <option value="A1">A1 — Beginner</option>
+                      <option value="A2" selected>A2 — Elementary</option>
+                      <option value="B1">B1 — Intermediate</option>
+                      <option value="B2">B2 — Upper Intermediate</option>
+                      <option value="C1">C1 — Advanced</option>
+                    </select>
+                  </label>
+                </div>
+
+                <label class="field">
+                  <span>Category</span>
+                  <select id="video-category">
+                    <option value="conversation">Real Conversation</option>
+                    <option value="vocab">Vocabulary Lesson</option>
+                    <option value="culture">Culture & Context</option>
+                    <option value="pronunciation">Pronunciation</option>
+                    <option value="grammar">Grammar Tip</option>
+                    <option value="travel">Travel Phrases</option>
+                    <option value="slang">Slang & Informal</option>
+                    <option value="story">Story / Skit</option>
+                  </select>
+                </label>
+
+                <div class="tag-section">
+                  <span>Topics (select up to 3)</span>
+                  <div class="tag-grid" id="tag-grid">
+                    <button type="button" class="tag" data-tag="food">Food & Dining</button>
+                    <button type="button" class="tag" data-tag="greetings">Greetings</button>
+                    <button type="button" class="tag" data-tag="shopping">Shopping</button>
+                    <button type="button" class="tag" data-tag="travel">Travel</button>
+                    <button type="button" class="tag" data-tag="work">Work & Business</button>
+                    <button type="button" class="tag" data-tag="family">Family & Friends</button>
+                    <button type="button" class="tag" data-tag="daily">Daily Routine</button>
+                    <button type="button" class="tag" data-tag="music">Music & Entertainment</button>
+                    <button type="button" class="tag" data-tag="sports">Sports</button>
+                    <button type="button" class="tag" data-tag="nature">Nature & Weather</button>
+                  </div>
+                </div>
+
+                <div class="checkbox-row">
+                  <label><input type="checkbox" id="has-subtitles" checked /> Video has subtitles / captions</label>
+                  <label><input type="checkbox" id="native-speaker" checked /> Features a native speaker</label>
+                  <label><input type="checkbox" id="slow-speech" /> Includes slow-speech segments</label>
+                </div>
+
+                <button type="submit" class="btn-publish" id="btn-publish">
+                  Upload & Score My Video
+                </button>
+              </form>
             </div>
 
-            <label class="field">
-              <span>Primary learning goal</span>
-              <select id="learning-goal"></select>
-            </label>
+            <!-- Right: Live Preview / Score Preview -->
+            <div class="preview-area">
+              <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <div class="phone-screen">
+                  <div class="phone-header">
+                    <span>duolingo</span>
+                    <span>For You</span>
+                  </div>
+                  <div class="phone-video" id="phone-video-area">
+                    <div class="phone-placeholder">
+                      <div class="phone-placeholder-icon">▶</div>
+                      <p>Your video preview</p>
+                    </div>
+                  </div>
+                  <div class="phone-overlay">
+                    <div class="phone-right-icons">
+                      <div class="phone-icon-btn">♥<small>—</small></div>
+                      <div class="phone-icon-btn">💬<small>—</small></div>
+                      <div class="phone-icon-btn">↗<small>—</small></div>
+                      <div class="phone-icon-btn study">📖<small>Study</small></div>
+                    </div>
+                    <div class="phone-bottom">
+                      <strong id="preview-creator">@maria_spanish</strong>
+                      <p id="preview-title">Your video title appears here</p>
+                      <div class="phone-tags">
+                        <span class="phone-tag" id="preview-lang">Spanish</span>
+                        <span class="phone-tag" id="preview-level">A2</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-            <button type="submit" class="primary-button">Run Demo Analysis</button>
-          </form>
+              <div class="preview-note">
+                This is how learners will see your video in their feed.
+              </div>
+            </div>
+          </div>
 
-          <div class="mini-callout">
-            <p class="mini-callout-label">What this page simulates</p>
-            <p>
-              Later, your backend can replace the mock estimator with real transcript,
-              speech-speed, subtitle, and vocabulary analysis.
-            </p>
+          <!-- Score Result (shown after upload) -->
+          <div class="score-result hidden" id="score-result">
+            <div class="score-result-header">
+              <div class="score-orb" id="score-orb">
+                <span class="score-num" id="score-num">0</span>
+                <span class="score-label">/ 100</span>
+              </div>
+              <div class="score-info">
+                <h2 id="score-title">Processing...</h2>
+                <p id="score-subtitle"></p>
+              </div>
+            </div>
+
+            <div class="score-metrics" id="score-metrics"></div>
+
+            <div class="score-feedback">
+              <div class="feedback-col">
+                <h4>Strengths</h4>
+                <ul id="score-strengths"></ul>
+              </div>
+              <div class="feedback-col">
+                <h4>Suggestions</h4>
+                <ul id="score-suggestions"></ul>
+              </div>
+            </div>
+
+            <div class="score-reach" id="score-reach"></div>
+
+            <div class="score-actions">
+              <button class="btn-publish" id="btn-confirm-publish">Publish to Duolingo</button>
+              <button class="btn-secondary" id="btn-edit-resubmit">Edit & Re-score</button>
+            </div>
           </div>
         </section>
 
-        <section class="glass-panel result-panel">
-          <div class="result-header">
+        <!-- MY VIDEOS PAGE -->
+        <section id="page-my-videos" class="page">
+          <div class="page-header">
             <div>
-              <p class="section-label">Learning Fit Score</p>
-              <h2 id="result-title">Waiting for a video</h2>
+              <h1>My Videos</h1>
+              <p>All your published and draft videos on Duolingo.</p>
             </div>
-            <div class="score-orb" id="score-orb">--</div>
           </div>
-
-          <div class="meta-row" id="result-meta">
-            <span>No analysis yet</span>
-          </div>
-
-          <p class="result-summary" id="result-summary">
-            This area shows the learning value estimate, what makes the clip useful,
-            and how Duolingo could convert it into lesson actions.
-          </p>
-
-          <div class="metric-grid" id="metric-grid"></div>
-
-          <div class="insight-grid">
-            <article class="insight-card">
-              <h3>Strengths</h3>
-              <ul id="strength-list" class="bullet-list"></ul>
-            </article>
-
-            <article class="insight-card">
-              <h3>Watch-outs</h3>
-              <ul id="caution-list" class="bullet-list"></ul>
-            </article>
-          </div>
-
-          <article class="journey-card">
-            <p class="journey-label">How Duolingo could respond</p>
-            <ul id="next-step-list" class="bullet-list"></ul>
-          </article>
+          <div class="video-list" id="my-video-list"></div>
         </section>
+
+        <!-- ANALYTICS PAGE -->
+        <section id="page-analytics" class="page">
+          <div class="page-header">
+            <div>
+              <h1>Creator Analytics</h1>
+              <p>See how your videos are performing with learners.</p>
+            </div>
+          </div>
+
+          <div class="analytics-overview">
+            <div class="analytics-card">
+              <span>Total Views</span>
+              <strong>284.7K</strong>
+              <small class="trend-up">+18% this month</small>
+            </div>
+            <div class="analytics-card">
+              <span>Study Actions</span>
+              <strong>41.2K</strong>
+              <small class="trend-up">+24% this month</small>
+            </div>
+            <div class="analytics-card">
+              <span>Avg. Learning Score</span>
+              <strong>89</strong>
+              <small>Top 5% of creators</small>
+            </div>
+            <div class="analytics-card">
+              <span>Followers</span>
+              <strong>12,431</strong>
+              <small class="trend-up">+312 this week</small>
+            </div>
+          </div>
+
+          <div class="analytics-chart-placeholder">
+            <h3>Views & Study Actions — Last 30 Days</h3>
+            <div class="mock-chart" id="mock-chart"></div>
+          </div>
+
+          <h3 class="section-title">Top Performing Videos</h3>
+          <div class="top-videos-list" id="top-videos-list"></div>
+        </section>
+
+        <!-- GUIDELINES PAGE -->
+        <section id="page-guidelines" class="page">
+          <div class="page-header">
+            <div>
+              <h1>Content Guidelines</h1>
+              <p>What makes a great learning video on Duolingo.</p>
+            </div>
+          </div>
+
+          <div class="guidelines-grid">
+            <div class="guideline-card do">
+              <h3>What scores high</h3>
+              <ul>
+                <li>Clear, natural speech at a steady pace</li>
+                <li>Accurate subtitles in the target language</li>
+                <li>Real-world scenarios (ordering food, asking directions)</li>
+                <li>Vocabulary that matches the tagged level</li>
+                <li>Repetition of key phrases</li>
+                <li>Visual context that supports comprehension</li>
+                <li>Under 60 seconds for maximum engagement</li>
+              </ul>
+            </div>
+            <div class="guideline-card dont">
+              <h3>What lowers your score</h3>
+              <ul>
+                <li>Heavy background music over speech</li>
+                <li>Too much slang without explanation</li>
+                <li>Speaking too fast for the tagged level</li>
+                <li>No subtitles or auto-generated only</li>
+                <li>Mixing multiple languages without context</li>
+                <li>Content unrelated to language learning</li>
+                <li>Poor audio quality or echo</li>
+              </ul>
+            </div>
+            <div class="guideline-card tip">
+              <h3>Pro tips from top creators</h3>
+              <ul>
+                <li>Start with a hook: "Here's how to say ___ in Spanish"</li>
+                <li>Show the word/phrase on screen while saying it</li>
+                <li>Use a "repeat after me" moment for engagement</li>
+                <li>End with a quick quiz or prompt</li>
+                <li>Film in the real environment (cafe, market, street)</li>
+                <li>Tag accurately — wrong level = bad match = low retention</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="scoring-breakdown">
+            <h3>How the Learning Score works</h3>
+            <p>Every video gets an automated 0–100 score based on these factors:</p>
+            <div class="scoring-weights">
+              <div class="weight-item">
+                <div class="weight-bar" style="width: 30%"></div>
+                <span>Speech Clarity — 30%</span>
+              </div>
+              <div class="weight-item">
+                <div class="weight-bar" style="width: 20%"></div>
+                <span>Subtitle Quality — 20%</span>
+              </div>
+              <div class="weight-item">
+                <div class="weight-bar" style="width: 20%"></div>
+                <span>Vocabulary Fit — 20%</span>
+              </div>
+              <div class="weight-item">
+                <div class="weight-bar" style="width: 15%"></div>
+                <span>Speaking Speed — 15%</span>
+              </div>
+              <div class="weight-item">
+                <div class="weight-bar" style="width: 10%"></div>
+                <span>Repetition & Phrases — 10%</span>
+              </div>
+              <div class="weight-item penalty">
+                <div class="weight-bar" style="width: 5%"></div>
+                <span>Slang / Noise Penalty — 5%</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
       </main>
-
-      <section id="library" class="library-section">
-        <div class="section-heading">
-          <div>
-            <p class="section-label">Demo Library</p>
-            <h2>Mock videos from platforms learners already use</h2>
-          </div>
-        </div>
-
-        <div id="demo-list" class="demo-grid"></div>
-      </section>
-
-      <section id="transformation" class="transformation-section">
-        <div class="section-heading">
-          <div>
-            <p class="section-label">Product Story</p>
-            <h2>Why this is more than a media player</h2>
-          </div>
-        </div>
-
-        <div class="transformation-grid">
-          <article class="story-card">
-            <span>01</span>
-            <h3>Import from the real internet</h3>
-            <p>
-              Students bring in the videos they already watch instead of staying
-              inside a closed content catalog.
-            </p>
-          </article>
-
-          <article class="story-card">
-            <span>02</span>
-            <h3>Score each clip for learning value</h3>
-            <p>
-              Duolingo can decide whether a video is beginner-friendly, subtitle-rich,
-              too fast, or ideal for conversation practice.
-            </p>
-          </article>
-
-          <article class="story-card">
-            <span>03</span>
-            <h3>Turn passive watching into study actions</h3>
-            <p>
-              The best clips become speaking prompts, vocabulary decks, replay drills,
-              and personalized practice pathways.
-            </p>
-          </article>
-        </div>
-      </section>
     </div>
 
     <script src="shared/mock-data.js"></script>
