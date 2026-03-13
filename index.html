@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LingoLens Media Studio</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a href="#" class="brand">
+          <span class="brand-mark">LL</span>
+          <span class="brand-copy">
+            <strong>LingoLens</strong>
+            <small>Media Studio for Duolingo</small>
+          </span>
+        </a>
+        <nav class="nav-links">
+          <a href="#workspace">Score Media</a>
+          <a href="#library">Demo Library</a>
+          <a href="#transformation">Why It Works</a>
+        </nav>
+        <div class="nav-pill">Front-end Prototype</div>
+      </header>
+
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Digital Transformation Concept</p>
+          <h1>Bring TikTok, Reels, and YouTube into the Duolingo learning loop.</h1>
+          <p class="hero-text">
+            Learners paste a link or upload a clip, and the page scores how useful
+            that video is for learning a specific language at a specific level.
+          </p>
+          <div class="hero-actions">
+            <a href="#workspace" class="primary-link">Try the scoring flow</a>
+            <a href="#library" class="secondary-link">See demo imports</a>
+          </div>
+        </div>
+
+        <div class="hero-panel">
+          <div class="hero-stat">
+            <span>Usefulness Score</span>
+            <strong>0-100</strong>
+            <p>Prototype estimate based on clarity, subtitle quality, pace, and level fit.</p>
+          </div>
+          <div class="hero-stat">
+            <span>Best for</span>
+            <strong>A1-C1</strong>
+            <p>Routes each video toward the right learner instead of treating every clip the same.</p>
+          </div>
+          <div class="hero-stat accent">
+            <span>Outcome</span>
+            <strong>Real-world media</strong>
+            <p>Duolingo shifts from fixed lessons into personalized, internet-native learning.</p>
+          </div>
+        </div>
+      </section>
+
+      <main id="workspace" class="workspace-grid">
+        <section class="glass-panel intake-panel">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Media Intake</p>
+              <h2>Analyze a video source</h2>
+            </div>
+            <span class="status-badge" id="sync-status">Ready</span>
+          </div>
+
+          <form id="analysis-form" class="analysis-form">
+            <label class="field">
+              <span>Video URL</span>
+              <input
+                type="url"
+                id="video-url"
+                placeholder="https://www.tiktok.com/@creator/video/123..."
+              />
+            </label>
+
+            <label class="upload-field" for="video-file">
+              <span>Upload a local clip</span>
+              <input type="file" id="video-file" accept="video/*" />
+              <strong id="file-name">No file selected</strong>
+              <small>Useful for demos before the real ingestion backend exists.</small>
+            </label>
+
+            <div class="form-grid">
+              <label class="field">
+                <span>Target language</span>
+                <select id="target-language"></select>
+              </label>
+
+              <label class="field">
+                <span>Learner level</span>
+                <select id="learner-level"></select>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Primary learning goal</span>
+              <select id="learning-goal"></select>
+            </label>
+
+            <button type="submit" class="primary-button">Run Demo Analysis</button>
+          </form>
+
+          <div class="mini-callout">
+            <p class="mini-callout-label">What this page simulates</p>
+            <p>
+              Later, your backend can replace the mock estimator with real transcript,
+              speech-speed, subtitle, and vocabulary analysis.
+            </p>
+          </div>
+        </section>
+
+        <section class="glass-panel result-panel">
+          <div class="result-header">
+            <div>
+              <p class="section-label">Learning Fit Score</p>
+              <h2 id="result-title">Waiting for a video</h2>
+            </div>
+            <div class="score-orb" id="score-orb">--</div>
+          </div>
+
+          <div class="meta-row" id="result-meta">
+            <span>No analysis yet</span>
+          </div>
+
+          <p class="result-summary" id="result-summary">
+            This area shows the learning value estimate, what makes the clip useful,
+            and how Duolingo could convert it into lesson actions.
+          </p>
+
+          <div class="metric-grid" id="metric-grid"></div>
+
+          <div class="insight-grid">
+            <article class="insight-card">
+              <h3>Strengths</h3>
+              <ul id="strength-list" class="bullet-list"></ul>
+            </article>
+
+            <article class="insight-card">
+              <h3>Watch-outs</h3>
+              <ul id="caution-list" class="bullet-list"></ul>
+            </article>
+          </div>
+
+          <article class="journey-card">
+            <p class="journey-label">How Duolingo could respond</p>
+            <ul id="next-step-list" class="bullet-list"></ul>
+          </article>
+        </section>
+      </main>
+
+      <section id="library" class="library-section">
+        <div class="section-heading">
+          <div>
+            <p class="section-label">Demo Library</p>
+            <h2>Mock videos from platforms learners already use</h2>
+          </div>
+        </div>
+
+        <div id="demo-list" class="demo-grid"></div>
+      </section>
+
+      <section id="transformation" class="transformation-section">
+        <div class="section-heading">
+          <div>
+            <p class="section-label">Product Story</p>
+            <h2>Why this is more than a media player</h2>
+          </div>
+        </div>
+
+        <div class="transformation-grid">
+          <article class="story-card">
+            <span>01</span>
+            <h3>Import from the real internet</h3>
+            <p>
+              Students bring in the videos they already watch instead of staying
+              inside a closed content catalog.
+            </p>
+          </article>
+
+          <article class="story-card">
+            <span>02</span>
+            <h3>Score each clip for learning value</h3>
+            <p>
+              Duolingo can decide whether a video is beginner-friendly, subtitle-rich,
+              too fast, or ideal for conversation practice.
+            </p>
+          </article>
+
+          <article class="story-card">
+            <span>03</span>
+            <h3>Turn passive watching into study actions</h3>
+            <p>
+              The best clips become speaking prompts, vocabulary decks, replay drills,
+              and personalized practice pathways.
+            </p>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <script src="shared/mock-data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
