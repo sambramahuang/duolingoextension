@@ -1,41 +1,47 @@
 # LingoLens Media Studio
 
-Front-end-only webpage prototype for a Duolingo feature that scores TikTok, Instagram, YouTube, or uploaded videos based on how useful they are for learning a target language.
+Creator-side upload studio that grades influencer videos for language-learning quality.
 
 ## What is included
 
-- Standalone webpage interface with a polished feature-demo layout
-- Media intake form for URL paste or local video upload
-- Target language, learner level, and learning-goal selectors
-- Mock scoring result with metric breakdown, strengths, cautions, and Duolingo follow-up actions
-- Demo library of sample videos from TikTok, Instagram, and YouTube concepts
-- Shared mock scoring logic stored locally in the browser
+- Upload UI for local video files
+- Flask backend API (`/api/analyze`) for real scoring
+- Audio extraction with FFmpeg
+- Transcription with OpenAI speech-to-text
+- Transcript scoring + frame-based visual quality scoring
+- Combined 0-100 score plus recommendations and teachable phrase translations
+- Frontend fallback to mock scoring if backend is unavailable
 
-## Current limitations
+## Backend requirements
 
-- No backend yet
-- No real scraping or ingestion
-- No transcript, subtitle, or speech analysis yet
-- Scores are demo estimates only
+- Python 3.10+
+- FFmpeg installed and available on `PATH`
+- `OPENAI_API_KEY` in environment (or `.env`)
 
-## Run the page
+## Setup
 
-You can open `index.html` directly in a browser, but using a tiny local server is cleaner:
+1. Install dependencies:
+   `pip install -r requirements.txt`
+2. Create `.env` from `.env.example` and set:
+   `OPENAI_API_KEY=...`
+3. Start backend:
+   `python server.py`
+4. Open the app:
+   `http://localhost:5001`
 
-1. In this folder, run `python3 -m http.server 4173`
-2. Open `http://localhost:4173`
+## API endpoints
 
-## Try the prototype
+- `GET /api/health` — service status, key/ffmpeg readiness
+- `POST /api/analyze` — multipart upload with `video` + metadata fields
 
-1. Paste a TikTok, Instagram, or YouTube URL, or choose a local video file.
-2. Pick the target language, learner level, and learning goal.
-3. Click **Run Demo Analysis**.
-4. Review the score and explanation.
-5. Click the demo cards to simulate how Duolingo might surface recommended media.
+Metadata fields supported:
+- `title`, `description`
+- `target_language_code`, `target_language_name`, `target_language`
+- `learner_level`, `category`, `topics`
+- `has_subtitles`, `native_speaker`, `slow_speech`
 
-## Good next steps
+## Notes
 
-- Add a backend for transcript extraction and feature scoring
-- Connect platform ingestion or file upload processing
-- Save analyzed clips into playlists or practice queues
-- Turn high-value lines into flashcards, shadowing drills, and listening tasks
+- Max upload size is 500MB.
+- Backend returns structured scores and metrics for the results panel.
+- If the API is down, frontend automatically uses demo/mock scoring.

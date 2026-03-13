@@ -81,7 +81,7 @@
               <!-- File selected state -->
               <div class="file-selected hidden" id="file-selected">
                 <div class="file-preview">
-                  <video id="video-preview" muted></video>
+                  <video id="video-preview" muted controls playsinline preload="metadata"></video>
                   <div class="file-overlay">
                     <button class="btn-change-file" id="btn-change-file">Change file</button>
                   </div>
@@ -184,7 +184,8 @@
                     <span>For You</span>
                   </div>
                   <div class="phone-video" id="phone-video-area">
-                    <div class="phone-placeholder">
+                    <video id="phone-video-preview" class="hidden" muted loop autoplay playsinline preload="metadata"></video>
+                    <div class="phone-placeholder" id="phone-video-placeholder">
                       <div class="phone-placeholder-icon">▶</div>
                       <p>Your video preview</p>
                     </div>
@@ -214,6 +215,30 @@
             </div>
           </div>
 
+          <!-- Analysis Loading State -->
+          <div class="analysis-loading hidden" id="analysis-loading">
+            <div class="loading-spinner"></div>
+            <h3>Analyzing your video with AI...</h3>
+            <div class="loading-steps">
+              <div class="loading-step" id="step-extract">
+                <span class="step-icon pending">1</span>
+                <span>Extracting audio with FFmpeg</span>
+              </div>
+              <div class="loading-step" id="step-transcribe">
+                <span class="step-icon pending">2</span>
+                <span>Transcribing speech with Whisper</span>
+              </div>
+              <div class="loading-step" id="step-frames">
+                <span class="step-icon pending">3</span>
+                <span>Analyzing video frames with GPT-4o</span>
+              </div>
+              <div class="loading-step" id="step-score">
+                <span class="step-icon pending">4</span>
+                <span>Scoring learning value</span>
+              </div>
+            </div>
+          </div>
+
           <!-- Score Result (shown after upload) -->
           <div class="score-result hidden" id="score-result">
             <div class="score-result-header">
@@ -227,7 +252,35 @@
               </div>
             </div>
 
-            <div class="score-metrics" id="score-metrics"></div>
+            <div class="proficiency-panel" id="proficiency-panel">
+              <div class="proficiency-label">Proficiency Classifier</div>
+              <div class="proficiency-code" id="proficiency-code">B1</div>
+              <div class="proficiency-note" id="proficiency-note">Detected CEFR level for this uploaded video.</div>
+            </div>
+
+            <div class="analytics-sections">
+              <div class="analytics-section">
+                <h4>Language Proficiency Analytics</h4>
+                <div class="score-metrics" id="language-metrics"></div>
+              </div>
+              <div class="analytics-section">
+                <h4>Video Quality Analytics</h4>
+                <div class="score-metrics" id="video-metrics"></div>
+              </div>
+            </div>
+
+            <!-- Transcript Section -->
+            <div class="transcript-section hidden" id="transcript-section">
+              <h4>Transcript</h4>
+              <div class="transcript-box" id="transcript-box"></div>
+              <div class="transcript-meta" id="transcript-meta"></div>
+            </div>
+
+            <!-- Translation Cards -->
+            <div class="translation-section hidden" id="translation-section">
+              <h4>Teachable Phrases</h4>
+              <div class="translation-cards" id="translation-cards"></div>
+            </div>
 
             <div class="score-feedback">
               <div class="feedback-col">
@@ -350,31 +403,23 @@
 
           <div class="scoring-breakdown">
             <h3>How the Learning Score works</h3>
-            <p>Every video gets an automated 0–100 score based on these factors:</p>
+            <p>This is the exact backend grading formula used during upload:</p>
             <div class="scoring-weights">
               <div class="weight-item">
+                <div class="weight-bar" style="width: 80%"></div>
+                <span>Whisper Teaching Score (1-10) — 80% of Learning Score</span>
+              </div>
+              <div class="weight-item">
+                <div class="weight-bar" style="width: 20%"></div>
+                <span>Whisper Target Alignment (1-10) — 20% of Learning Score</span>
+              </div>
+              <div class="weight-item">
+                <div class="weight-bar" style="width: 70%"></div>
+                <span>Learning Score Contribution — 70% of Final Score</span>
+              </div>
+              <div class="weight-item">
                 <div class="weight-bar" style="width: 30%"></div>
-                <span>Speech Clarity — 30%</span>
-              </div>
-              <div class="weight-item">
-                <div class="weight-bar" style="width: 20%"></div>
-                <span>Subtitle Quality — 20%</span>
-              </div>
-              <div class="weight-item">
-                <div class="weight-bar" style="width: 20%"></div>
-                <span>Vocabulary Fit — 20%</span>
-              </div>
-              <div class="weight-item">
-                <div class="weight-bar" style="width: 15%"></div>
-                <span>Speaking Speed — 15%</span>
-              </div>
-              <div class="weight-item">
-                <div class="weight-bar" style="width: 10%"></div>
-                <span>Repetition & Phrases — 10%</span>
-              </div>
-              <div class="weight-item penalty">
-                <div class="weight-bar" style="width: 5%"></div>
-                <span>Slang / Noise Penalty — 5%</span>
+                <span>Video Frame Quality Contribution — 30% of Final Score</span>
               </div>
             </div>
           </div>
@@ -384,6 +429,7 @@
     </div>
 
     <script src="shared/mock-data.js"></script>
+    <script src="shared/languages.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
