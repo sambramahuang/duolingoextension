@@ -14,7 +14,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
-from transcriber import analyze_video_file
+from transcriber import FFMPEG_BIN, analyze_video_file
 
 load_dotenv()
 
@@ -22,7 +22,13 @@ app = Flask(__name__, static_folder=".", static_url_path="")
 CORS(app)
 
 ALLOWED_EXTENSIONS = {"mp4", "mov", "webm", "avi", "mkv"}
-MAX_CONTENT_LENGTH = 500 * 1024 * 1024  # 500MB
+IS_VERCEL = os.environ.get("VERCEL") == "1" or bool(os.environ.get("VERCEL_ENV"))
+_default_upload_limit_mb = 4.5 if IS_VERCEL else 500.0
+try:
+    UPLOAD_LIMIT_MB = float(os.environ.get("UPLOAD_LIMIT_MB", str(_default_upload_limit_mb)))
+except ValueError:
+    UPLOAD_LIMIT_MB = _default_upload_limit_mb
+MAX_CONTENT_LENGTH = int(max(1.0, UPLOAD_LIMIT_MB) * 1024 * 1024)
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
 
 
@@ -32,6 +38,12 @@ def _json_error(message, status=400):
 
 def _allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def _format_upload_limit_mb():
+    if float(UPLOAD_LIMIT_MB).is_integer():
+        return str(int(UPLOAD_LIMIT_MB))
+    return str(UPLOAD_LIMIT_MB)
 
 
 def _parse_bool(value, default=False):
@@ -70,7 +82,7 @@ def _extract_metadata(form):
 def _ffmpeg_available():
     try:
         subprocess.run(
-            ["ffmpeg", "-version"],
+            [FFMPEG_BIN, "-version"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             check=True,
@@ -93,6 +105,8 @@ def health():
             "service": "duolingo-creator-grading",
             "openai_configured": bool(os.environ.get("OPENAI_API_KEY")),
             "ffmpeg_available": _ffmpeg_available(),
+            "runtime": "vercel" if IS_VERCEL else "local",
+            "upload_limit_mb": UPLOAD_LIMIT_MB,
         }
     )
 
@@ -113,6 +127,12 @@ def analyze():
         return _json_error(
             f"File type not allowed. Use one of: {', '.join(sorted(ALLOWED_EXTENSIONS))}",
             status=400,
+        )
+
+    if request.content_length and request.content_length > app.config["MAX_CONTENT_LENGTH"]:
+        return _json_error(
+            f"Uploaded file is too large (max {_format_upload_limit_mb()}MB on this deployment)",
+            status=413,
         )
 
     metadata = _extract_metadata(request.form)
@@ -155,7 +175,10 @@ def analyze():
 
 @app.errorhandler(413)
 def payload_too_large(_error):
-    return _json_error("Uploaded file is too large (max 500MB)", status=413)
+    return _json_error(
+        f"Uploaded file is too large (max {_format_upload_limit_mb()}MB on this deployment)",
+        status=413,
+    )
 
 
 if __name__ == "__main__":

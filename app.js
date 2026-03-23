@@ -2,7 +2,13 @@
 // Calls the real Flask backend at /api/analyze.
 // If backend is unavailable, no rating is shown.
 
-const API_URL = "http://localhost:5001/api/analyze";
+const API_URL = (() => {
+  if (window.__API_URL__) return String(window.__API_URL__);
+  if (window.location.hostname === "localhost" && window.location.port === "3000") {
+    return "http://localhost:5001/api/analyze";
+  }
+  return `${window.location.origin}/api/analyze`;
+})();
 
 // ===== Navigation =====
 document.querySelectorAll('.nav-item').forEach(link => {

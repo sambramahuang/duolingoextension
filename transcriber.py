@@ -18,6 +18,24 @@ VISION_MODEL = os.environ.get("VISION_MODEL", "gpt-4o-mini")
 TRANSCRIPTION_MODEL = os.environ.get("TRANSCRIPTION_MODEL", "whisper-1")
 MAX_FRAMES = int(os.environ.get("MAX_FRAMES", "6"))
 NATIVE_LANGUAGE = os.environ.get("NATIVE_LANGUAGE", "English")
+def _resolve_ffmpeg_bin():
+    env_bin = os.environ.get("FFMPEG_BIN")
+    if env_bin:
+        return env_bin
+
+    path_bin = shutil.which("ffmpeg")
+    if path_bin:
+        return path_bin
+
+    try:
+        import imageio_ffmpeg
+
+        return imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception:
+        return "ffmpeg"
+
+
+FFMPEG_BIN = _resolve_ffmpeg_bin()
 
 _client = None
 
@@ -315,12 +333,14 @@ def score_language_teaching(transcript, metadata=None):
 def extract_frames(video_path, max_frames=MAX_FRAMES):
     temp_dir = Path(tempfile.mkdtemp(prefix="duo_frames_"))
     cmd = [
-        "ffmpeg",
+        FFMPEG_BIN,
         "-y",
         "-i",
         str(video_path),
         "-vf",
         "fps=1",
+        "-frames:v",
+        str(max_frames),
         str(temp_dir / "frame_%03d.jpg"),
     ]
     try:
@@ -352,7 +372,7 @@ def encode_image(image_path):
 
 def convert_video_to_mp3(input_video, output_mp3):
     cmd = [
-        "ffmpeg",
+        FFMPEG_BIN,
         "-y",
         "-i",
         str(input_video),
@@ -432,11 +452,15 @@ def score_video_quality(video_path):
             }
         ]
 
-        for frame in frames:
+        # Encode frame files concurrently to reduce CPU-bound base64 overhead.
+        with ThreadPoolExecutor(max_workers=min(4, len(frames))) as encoder_pool:
+            encoded_frames = list(encoder_pool.map(encode_image, frames))
+
+        for encoded_frame in encoded_frames:
             content.append(
                 {
                     "type": "input_image",
-                    "image_url": f"data:image/jpeg;base64,{encode_image(frame)}",
+                    "image_url": f"data:image/jpeg;base64,{encoded_frame}",
                 }
             )
 
@@ -489,6 +513,11 @@ def run_transcription_pipeline(mp3_path, prompt, metadata):
     return text, transcript_analysis
 
 
+def run_transcription_from_video_pipeline(video_path, mp3_path, prompt, metadata):
+    convert_video_to_mp3(video_path, mp3_path)
+    return run_transcription_pipeline(mp3_path, prompt, metadata)
+
+
 def run_video_quality_pipeline(video_path):
     return score_video_quality(video_path)
 
@@ -504,11 +533,13 @@ def analyze_video_file(video_path, metadata=None):
         mp3_path = temp_mp3.name
 
     try:
-        convert_video_to_mp3(str(input_path), mp3_path)
-
         with ThreadPoolExecutor(max_workers=2) as executor:
             transcript_future = executor.submit(
-                run_transcription_pipeline, mp3_path, prompt, metadata
+                run_transcription_from_video_pipeline,
+                str(input_path),
+                mp3_path,
+                prompt,
+                metadata,
             )
             video_future = executor.submit(run_video_quality_pipeline, str(input_path))
 
