@@ -10,6 +10,52 @@ const API_URL = (() => {
   return `${window.location.origin}/api/analyze`;
 })();
 
+const SIDEBAR_STORAGE_KEY = 'duo_sidebar_collapsed';
+
+function applySidebarCollapsedState(collapsed) {
+  document.body.classList.toggle('sidebar-collapsed', collapsed);
+  const toggleBtn = document.getElementById('sidebar-toggle');
+  if (!toggleBtn) return;
+  toggleBtn.setAttribute('aria-expanded', String(!collapsed));
+  toggleBtn.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+}
+
+function getSavedSidebarCollapsedState() {
+  try {
+    return window.localStorage.getItem(SIDEBAR_STORAGE_KEY) === '1';
+  } catch (_err) {
+    return false;
+  }
+}
+
+function saveSidebarCollapsedState(collapsed) {
+  try {
+    window.localStorage.setItem(SIDEBAR_STORAGE_KEY, collapsed ? '1' : '0');
+  } catch (_err) {
+    // Ignore storage errors (private mode or blocked storage).
+  }
+}
+
+const sidebarToggleButton = document.getElementById('sidebar-toggle');
+if (sidebarToggleButton) {
+  const initialCollapsed = window.innerWidth > 960 && getSavedSidebarCollapsedState();
+  applySidebarCollapsedState(initialCollapsed);
+
+  sidebarToggleButton.addEventListener('click', () => {
+    const nextCollapsed = !document.body.classList.contains('sidebar-collapsed');
+    applySidebarCollapsedState(nextCollapsed);
+    saveSidebarCollapsedState(nextCollapsed);
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth <= 960) {
+      applySidebarCollapsedState(false);
+      return;
+    }
+    applySidebarCollapsedState(getSavedSidebarCollapsedState());
+  });
+}
+
 // ===== Navigation =====
 document.querySelectorAll('.nav-item').forEach(link => {
   link.addEventListener('click', e => {

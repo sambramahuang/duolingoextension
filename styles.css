@@ -37,6 +37,9 @@
   --shadow-lg: 0 12px 40px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.04);
   --shadow-green: 0 4px 20px rgba(88, 204, 2, 0.25);
   --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --sidebar-width: 272px;
+  --upload-preview-col: 330px;
+  --upload-layout-gap: 36px;
 }
 
 html { scroll-behavior: smooth; }
@@ -60,6 +63,8 @@ body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  position: relative;
+  align-items: stretch;
 }
 
 img,
@@ -71,26 +76,67 @@ svg {
 
 /* ===== Sidebar ===== */
 .sidebar {
-  width: 272px;
+  width: var(--sidebar-width);
   background: linear-gradient(180deg, var(--white) 0%, #f9fdf5 100%);
   border-right: 1px solid rgba(0,0,0,0.06);
   display: flex;
   flex-direction: column;
   padding: 28px 18px;
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  position: relative;
+  height: auto;
+  min-height: 100%;
   flex-shrink: 0;
   box-shadow: 2px 0 20px rgba(0,0,0,0.03);
+  z-index: 1;
+  transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1), padding 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  justify-content: space-between;
   padding: 0 10px 28px;
   border-bottom: 1px solid rgba(0,0,0,0.06);
   margin-bottom: 28px;
+}
+
+.sidebar-brand-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.sidebar-brand-text {
+  min-width: 0;
+  transition: opacity 0.22s ease, max-width 0.22s ease, margin 0.22s ease;
+}
+
+.sidebar-toggle {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+  color: var(--gray-500);
+  border-radius: 8px;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.sidebar-toggle:hover {
+  color: var(--gray-700);
+  border-color: var(--gray-300);
+  transform: translateX(-1px);
+}
+
+.sidebar-toggle-icon {
+  transform: translateY(-1px);
 }
 
 .duo-icon {
@@ -135,7 +181,7 @@ svg {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  flex: 1;
+  flex: 0 0 auto;
 }
 
 .nav-item {
@@ -192,12 +238,18 @@ svg {
   background: rgba(88,204,2,0.15);
 }
 
+.nav-label {
+  display: inline-block;
+  transition: opacity 0.2s ease, max-width 0.2s ease, margin 0.2s ease, transform 0.2s ease;
+}
+
 .sidebar-profile {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 18px 10px 0;
   border-top: 1px solid rgba(0,0,0,0.06);
+  margin-top: 24px;
 }
 
 .avatar {
@@ -228,12 +280,72 @@ svg {
   font-weight: 600;
 }
 
+.sidebar-profile-text {
+  min-width: 0;
+  transition: opacity 0.22s ease, max-width 0.22s ease, margin 0.22s ease;
+}
+
 /* ===== Main Content ===== */
 .main-content {
   flex: 1;
   padding: 36px 48px;
   max-width: 1120px;
   min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+body.sidebar-collapsed {
+  --sidebar-width: 96px;
+}
+
+body.sidebar-collapsed .sidebar {
+  padding: 24px 10px;
+}
+
+body.sidebar-collapsed .sidebar-brand {
+  padding: 0 4px 24px;
+}
+
+body.sidebar-collapsed .sidebar-brand-main {
+  gap: 0;
+}
+
+body.sidebar-collapsed .sidebar-brand-text,
+body.sidebar-collapsed .sidebar-profile-text,
+body.sidebar-collapsed .nav-label {
+  opacity: 0;
+  max-width: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+body.sidebar-collapsed .nav-label {
+  transform: translateX(-6px);
+}
+
+body.sidebar-collapsed .sidebar-nav {
+  align-items: center;
+}
+
+body.sidebar-collapsed .nav-item {
+  justify-content: center;
+  gap: 0;
+  width: 52px;
+  padding: 12px 0;
+}
+
+body.sidebar-collapsed .nav-item.active::before {
+  display: none;
+}
+
+body.sidebar-collapsed .sidebar-profile {
+  justify-content: center;
+  padding: 18px 0 0;
+}
+
+body.sidebar-collapsed .sidebar-toggle {
+  transform: rotate(180deg);
 }
 
 .page { display: none; }
@@ -299,9 +411,13 @@ svg {
 /* ===== Upload Layout ===== */
 .upload-layout {
   display: grid;
-  grid-template-columns: 1fr 330px;
-  gap: 36px;
+  grid-template-columns: 1fr var(--upload-preview-col);
+  gap: var(--upload-layout-gap);
   align-items: start;
+}
+
+.upload-form-area {
+  min-width: 0;
 }
 
 @media (max-width: 960px) {
@@ -787,6 +903,14 @@ svg {
 .score-result {
   margin-top: 44px;
   animation: fadeUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Keep post-upload sections aligned with the left column width */
+.analysis-loading,
+.score-result,
+.error-banner {
+  width: min(100%, calc(100% - var(--upload-preview-col) - var(--upload-layout-gap)));
+  margin-right: auto;
 }
 
 @keyframes fadeUp {
@@ -1416,10 +1540,14 @@ svg {
 
 /* ===== Analysis Loading ===== */
 .analysis-loading {
-  text-align: center;
-  padding: 60px 20px;
+  text-align: left;
+  padding: 30px 28px;
   margin-top: 40px;
   animation: fadeUp 0.4s ease;
+  background: linear-gradient(135deg, var(--white), var(--gray-50));
+  border-radius: var(--radius);
+  border: 1px solid rgba(0,0,0,0.04);
+  box-shadow: var(--shadow);
 }
 
 .loading-spinner {
@@ -1429,7 +1557,7 @@ svg {
   border-top-color: var(--green);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin: 0 auto 20px;
+  margin: 0 0 20px;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -1445,8 +1573,8 @@ svg {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  max-width: 360px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   text-align: left;
 }
 
@@ -1668,6 +1796,21 @@ svg {
     border-bottom: 1px solid rgba(0,0,0,0.08);
     box-shadow: 0 6px 18px rgba(0,0,0,0.06);
     overflow-x: clip;
+    background: linear-gradient(180deg, var(--white) 0%, #f9fdf5 100%);
+  }
+
+  .sidebar-toggle {
+    display: none;
+  }
+
+  .sidebar-brand-text,
+  .sidebar-profile-text,
+  .nav-label {
+    opacity: 1 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    transform: none !important;
+    overflow: visible !important;
   }
 
   .sidebar-brand {
@@ -1885,6 +2028,12 @@ svg {
 
   .analysis-loading {
     padding: 42px 12px;
+  }
+
+  .analysis-loading,
+  .score-result,
+  .error-banner {
+    width: 100%;
   }
 
   .chart-bar-group {
