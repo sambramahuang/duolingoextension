@@ -749,11 +749,11 @@ function formatNum(n) {
 }
 
 function scoreColor(score) {
-  if (score === null) return '#a3a3a3';
-  if (score >= 85) return '#58cc02';
-  if (score >= 70) return '#1cb0f6';
-  if (score >= 50) return '#ff9600';
-  return '#ff4b4b';
+  if (score === null) return '#607a95';
+  if (score >= 85) return '#3ddc73';
+  if (score >= 70) return '#58abff';
+  if (score >= 50) return '#ffb75f';
+  return '#ff6d79';
 }
 
 function pickRandom(arr, count, seed) {
